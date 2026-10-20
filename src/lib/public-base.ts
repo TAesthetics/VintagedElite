@@ -16,7 +16,9 @@ export function apiPath(path: string): string {
   return `${prefix}${path}`;
 }
 
-export function allowedReturnBase(value: unknown): string | null {
+const SHOP_HOSTS = new Set(["vintagedelite.shop", "www.vintagedelite.shop"]);
+
+export function allowedReturnBase(value: unknown, requestHost?: string): string | null {
   if (typeof value !== "string" || value.length > 300) return null;
   let url: URL;
   try {
@@ -26,11 +28,14 @@ export function allowedReturnBase(value: unknown): string | null {
   }
   const host = url.hostname.toLowerCase();
   const local = host === "localhost" || host === "127.0.0.1";
+  const sameHost = requestHost ? host === requestHost : false;
   const known =
     local ||
+    sameHost ||
     host.endsWith(".grok.me") ||
     host.endsWith(".grok.build") ||
-    PREVIEW_HOSTS.has(host);
+    PREVIEW_HOSTS.has(host) ||
+    SHOP_HOSTS.has(host);
   if (!known) return null;
   if (url.protocol !== "https:" && !local) return null;
   if (url.protocol !== "http:" && url.protocol !== "https:") return null;

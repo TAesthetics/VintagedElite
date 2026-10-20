@@ -37,7 +37,7 @@ function text(value: unknown, max: number) {
   return value.trim().slice(0, max);
 }
 
-export function readCheckoutBody(input: unknown): CheckoutBody | Fail {
+export function readCheckoutBody(input: unknown, requestHost?: string): CheckoutBody | Fail {
   if (!input || typeof input !== "object") return fail("Ungültiger Auftrag.");
   const body = input as Record<string, unknown>;
   const name = text(body.name, 80);
@@ -48,7 +48,7 @@ export function readCheckoutBody(input: unknown): CheckoutBody | Fail {
   const country = text(body.country, 2).toUpperCase();
   const note = text(body.note, 400);
   const phone = text(body.phone, 40);
-  const returnBase = allowedReturnBase(body.returnBase);
+  const returnBase = allowedReturnBase(body.returnBase, requestHost);
   if (name.length < 2) return fail("Name fehlt.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("E-Mail fehlt.");
   if (street.length < 3 || zip.length < 3 || city.length < 2) return fail("Adresse unvollständig.");
@@ -94,8 +94,8 @@ function lineName(product: Product, variantLabel: string) {
   return variantLabel ? `${product.name} · ${variantLabel}` : product.name;
 }
 
-export async function createCheckoutUrl(input: unknown) {
-  const body = readCheckoutBody(input);
+export async function createCheckoutUrl(input: unknown, requestHost?: string) {
+  const body = readCheckoutBody(input, requestHost);
   if (isFail(body)) return body;
   const items = await resolve(body.lines);
   if (isFail(items)) return items;

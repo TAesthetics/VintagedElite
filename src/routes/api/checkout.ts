@@ -11,7 +11,11 @@ export const Route = createFileRoute("/api/checkout")({
         } catch {
           return Response.json({ error: "Ungültiger Auftrag." }, { status: 400 });
         }
-        const result = await createCheckoutUrl(body);
+        const forwarded = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+        const requestHost = (forwarded || request.headers.get("host") || "")
+          .replace(/:\d+$/, "")
+          .toLowerCase();
+        const result = await createCheckoutUrl(body, requestHost);
         const status = "url" in result ? 200 : result.status;
         return Response.json("url" in result ? { url: result.url } : { error: result.error }, {
           status,
