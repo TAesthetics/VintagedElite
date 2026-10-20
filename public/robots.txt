@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+Disallow: /kasse
+Disallow: /api
+Disallow: /login
+Disallow: /atelier
+
+Sitemap: https://vintagedelite.shop/sitemap.xml
