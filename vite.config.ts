@@ -142,6 +142,19 @@ function authPopupPlugin(): Plugin {
   };
 }
 
+function deployPreset(): "vercel" | "node-server" {
+  const fromEnv = process.env.NITRO_PRESET;
+  if (fromEnv === "node-server" || fromEnv === "vercel") return fromEnv;
+  if (
+    process.env.RAILWAY_ENVIRONMENT ||
+    process.env.RAILWAY_PROJECT_ID ||
+    process.env.RAILWAY_SERVICE_ID
+  ) {
+    return "node-server";
+  }
+  return "vercel";
+}
+
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
@@ -170,7 +183,7 @@ export default defineConfig(({ command, isPreview }) => ({
     ...(command === "build" || isPreview
       ? [
           nitro({
-            preset: "vercel",
+            preset: deployPreset(),
             // Auto-registers server/middleware/* (the PWA install page +
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
