@@ -6,7 +6,7 @@ export const Route = createFileRoute("/impressum")({
     pageHead({
       title: "Impressum",
       description:
-        "Impressum von VintageElite. Kontakt hallo@vintagedelite.shop. Kein erfundener Registereintrag.",
+        "Impressum von VintageElite. Kontakt terence.nwaeke@gmail.com. Kein erfundener Registereintrag.",
       path: "/impressum",
     }),
   component: ImpressumPage,
@@ -18,7 +18,7 @@ function ImpressumPage() {
       <p className="text-xs tracking-widest text-brass uppercase">Impressum</p>
       <h1 className="mt-2 font-display text-4xl">VintageElite</h1>
       <p className="mt-6 text-muted">
-        Marke und Shop für Powerlifting-Equipment. Kontakt: hallo@vintagedelite.shop. Zahlung läuft
+        Marke und Shop für Powerlifting-Equipment. Kontakt: terence.nwaeke@gmail.com. Zahlung läuft
         über Stripe, sobald der geheime Schlüssel im Projekt liegt. Ohne diesen Schlüssel nimmt die
         Kasse keine Karte an und bucht nichts ab.
       </p>
