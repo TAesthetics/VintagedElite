@@ -103,7 +103,7 @@ export async function createCheckoutUrl(input: unknown, requestHost?: string) {
   const key = env("STRIPE_SECRET_KEY");
   if (!key) {
     return fail(
-      "Stripe ist noch nicht verbunden. Hinterlege STRIPE_SECRET_KEY (Testschlüssel sk_test_…) in den Projekteinstellungen und veröffentliche erneut.",
+      "Stripe ist noch nicht verbunden. In Railway bei VintageElite unter Variables die Variable STRIPE_SECRET_KEY anlegen (Live-Schlüssel sk_live_… aus Stripe, Entwickler, API-Schlüssel). Railway startet danach neu.",
       503,
     );
   }
