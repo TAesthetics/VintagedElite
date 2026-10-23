@@ -114,6 +114,7 @@ export async function createCheckoutUrl(input: unknown, requestHost?: string) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       locale: "de",
+      payment_method_types: ["card"],
       customer_email: body.email,
       success_url: `${body.returnBase}/kasse/danke?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${body.returnBase}/checkout`,
@@ -191,7 +192,19 @@ export async function createCheckoutUrl(input: unknown, requestHost?: string) {
     return { url: session.url };
   } catch (error) {
     console.error(error);
-    return fail("Stripe hat die Zahlung abgelehnt. Prüfe den Schlüssel und versuch es erneut.", 502);
+    const detail = error instanceof Error ? error.message : "";
+    if (detail.includes("No valid payment method")) {
+      return fail(
+        "Stripe hat keine Kartenzahlung aktiv. Im Dashboard unter Einstellungen, Zahlungsmethoden, Karte einschalten.",
+        502,
+      );
+    }
+    return fail(
+      detail
+        ? `Stripe hat die Zahlung abgelehnt: ${detail}`
+        : "Stripe hat die Zahlung abgelehnt. Prüfe den Schlüssel und versuch es erneut.",
+      502,
+    );
   }
 }
 
