@@ -113,7 +113,7 @@ function CartBody() {
           to="/checkout"
           className="mt-6 inline-flex min-h-11 w-full items-center justify-center bg-oxblood text-sm text-paper"
         >
-          Weiter zur Stripe-Kasse
+          Weiter zur Kasse
         </Link>
       </aside>
     </div>

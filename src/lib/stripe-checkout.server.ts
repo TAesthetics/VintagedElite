@@ -6,7 +6,7 @@ import {
 import { clothingBySlug } from "@/lib/clothing.server";
 import { env } from "@/lib/env.server";
 import { allowedReturnBase } from "@/lib/public-base";
-import { recordCheckout, markOrderPaid } from "@/lib/orders.server";
+import { recordCheckout, markOrderPaid, getShopOrder } from "@/lib/orders.server";
 import { quote, type QuoteItem } from "@/lib/quote";
 
 const COUNTRIES = new Set(["DE", "AT", "NL", "BE", "FR", "IT", "PL", "CH"]);
@@ -92,6 +92,41 @@ async function resolve(lines: CheckoutLine[]): Promise<QuoteItem[] | Fail> {
 
 function lineName(product: Product, variantLabel: string) {
   return variantLabel ? `${product.name} · ${variantLabel}` : product.name;
+}
+
+export async function placeInvoiceOrder(input: unknown, requestHost?: string) {
+  const body = readCheckoutBody(input, requestHost);
+  if (isFail(body)) return body;
+  const items = await resolve(body.lines);
+  if (isFail(items)) return items;
+
+  const priced = quote(items, body.country);
+  const id = `re_${crypto.randomUUID().replaceAll("-", "")}`;
+  try {
+    await recordCheckout({
+      id,
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      street: body.street,
+      zip: body.zip,
+      city: body.city,
+      country: body.country,
+      note: body.note,
+      lines: items.map((item) => ({
+        name: lineName(item.product, item.variantLabel),
+        qty: item.qty,
+        price: item.product.price,
+      })),
+      goods: priced.goods,
+      shipping: priced.shipping,
+      total: priced.total,
+    });
+  } catch (error) {
+    console.error(error);
+    return fail("Die Bestellung konnte nicht gespeichert werden.", 500);
+  }
+  return { url: `${body.returnBase}/kasse/danke?session_id=${id}` };
 }
 
 export async function createCheckoutUrl(input: unknown, requestHost?: string) {
@@ -209,6 +244,19 @@ export async function createCheckoutUrl(input: unknown, requestHost?: string) {
 }
 
 export async function readPaidSession(sessionId: string) {
+  if (sessionId.startsWith("re_")) {
+    if (!/^re_[a-f0-9]{32}$/.test(sessionId)) return fail("Keine Bestellung.", 400);
+    const order = await getShopOrder(sessionId);
+    if (!order) return fail("Keine Bestellung.", 404);
+    return {
+      id: order.id,
+      paid: false,
+      invoice: true,
+      email: order.email,
+      total: order.total,
+      name: order.name,
+    };
+  }
   if (!sessionId.startsWith("cs_")) return fail("Keine Stripe-Sitzung.", 400);
   const key = env("STRIPE_SECRET_KEY");
   if (!key) return fail("Stripe ist nicht verbunden.", 503);

@@ -12,6 +12,7 @@ type Paid = {
   email: string;
   total: number;
   name: string;
+  invoice?: boolean;
 };
 
 export const Route = createFileRoute("/kasse/danke")({
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/kasse/danke")({
 function ThanksPage() {
   const { session_id } = Route.useSearch();
   const clear = useCart((state) => state.clear);
-  const [state, setState] = useState<"wait" | "paid" | "open" | "bad">("wait");
+  const [state, setState] = useState<"wait" | "paid" | "invoice" | "open" | "bad">("wait");
   const [order, setOrder] = useState<Paid | null>(null);
 
   useEffect(() => {
@@ -48,7 +49,10 @@ function ThanksPage() {
       .then((paid) => {
         if (gone) return;
         setOrder(paid);
-        if (paid.paid) {
+        if (paid.invoice) {
+          setState("invoice");
+          clear();
+        } else if (paid.paid) {
           setState("paid");
           clear();
         } else setState("open");
@@ -63,7 +67,7 @@ function ThanksPage() {
 
   return (
     <div className="mx-auto max-w-xl px-5 py-16">
-      {state === "wait" && <p className="text-muted">Zahlung wird bei Stripe geprüft.</p>}
+      {state === "wait" && <p className="text-muted">Bestellung wird geprüft.</p>}
       {state === "paid" && order && (
         <>
           <p className="text-xs tracking-widest text-brass uppercase">Bezahlt</p>
@@ -71,6 +75,16 @@ function ThanksPage() {
           <p className="mt-4 text-muted">
             Stripe hat {eur(order.total)} bestätigt{order.email ? ` an ${order.email}` : ""}. Referenz{" "}
             {order.id}.
+          </p>
+        </>
+      )}
+      {state === "invoice" && order && (
+        <>
+          <p className="text-xs tracking-widest text-brass uppercase">Auf Rechnung</p>
+          <h1 className="mt-2 font-display text-4xl">Bestellung ist da{order.name ? `, ${order.name}` : ""}.</h1>
+          <p className="mt-4 text-muted">
+            {eur(order.total)} auf Rechnung. Referenz {order.id}. Die Rechnung mit der Bankverbindung geht an{" "}
+            {order.email}. Zahlbar in 14 Tagen. Der Versand startet nach dem Zahlungseingang.
           </p>
         </>
       )}
@@ -83,7 +97,7 @@ function ThanksPage() {
       {state === "bad" && (
         <>
           <h1 className="font-display text-4xl">Keine Bestätigung.</h1>
-          <p className="mt-4 text-muted">Die Stripe-Sitzung fehlt oder der Schlüssel ist nicht gesetzt.</p>
+          <p className="mt-4 text-muted">Die Bestellung fehlt oder ist nicht mehr abrufbar.</p>
         </>
       )}
       <Link to="/shop" search={EMPTY_SEARCH} className="mt-8 inline-flex min-h-11 items-center underline">

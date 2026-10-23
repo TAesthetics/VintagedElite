@@ -15,7 +15,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "VintageElite: Second-Hand-Mode aus dem Atelier und Powerlifting-Equipment. Ein Warenkorb, Zahlung über Stripe.",
+          "VintageElite: Second-Hand-Mode aus dem Atelier und Powerlifting-Equipment. Ein Warenkorb, Zahlung auf Rechnung.",
       },
       { name: "theme-color", content: "#F3EEE4" },
     ],

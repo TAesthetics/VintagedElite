@@ -13,7 +13,7 @@ export const Route = createFileRoute("/checkout")({
   head: () =>
     pageHead({
       title: "Kasse",
-      description: "Kasse bei VintageElite. Zahlung über Stripe.",
+      description: "Kasse bei VintageElite. Zahlung auf Rechnung.",
       path: "/checkout",
       index: false,
     }),
@@ -112,7 +112,7 @@ function CheckoutForm() {
       <div className="lg:col-span-7">
         <h1 className="font-display text-4xl">Kasse</h1>
         <p className="mt-3 text-muted">
-          Adresse hier, Kartenzahlung auf der Stripe-Seite. Es werden keine Kartennummern in diesem Shop gespeichert.
+          Adresse hier. Zahlung auf Rechnung, keine Karte. Die Rechnung kommt an die E-Mail. Versand nach Zahlungseingang.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <Field label="Name" name="name" autoComplete="name" className="sm:col-span-2" />
@@ -143,7 +143,7 @@ function CheckoutForm() {
         </div>
       </div>
       <aside className="h-fit border border-line bg-surface p-6 lg:col-span-5">
-        <h2 className="font-display text-2xl">Stripe</h2>
+        <h2 className="font-display text-2xl">Rechnung</h2>
         <ul className="mt-4 space-y-2 text-sm">
           {resolved.map((line) => (
             <li key={`${line.slug}-${line.variantId}`} className="flex justify-between gap-3">
@@ -176,7 +176,7 @@ function CheckoutForm() {
           disabled={busy}
           className="mt-6 inline-flex min-h-11 w-full items-center justify-center bg-oxblood text-sm text-paper disabled:opacity-60"
         >
-          {busy ? "Weiter zu Stripe…" : "Mit Stripe zahlen"}
+          {busy ? "Bestellung wird gespeichert…" : "Auf Rechnung bestellen"}
         </button>
       </aside>
     </form>

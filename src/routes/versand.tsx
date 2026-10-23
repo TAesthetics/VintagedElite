@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: "Zahlung",
-    a: "Nur über Stripe. Karte und die von Stripe angebotenen Methoden. Dieser Shop speichert keine Kartennummer.",
+    a: "Auf Rechnung, zahlbar innerhalb von 14 Tagen. Der Versand startet nach Zahlungseingang. Keine Kartenzahlung.",
   },
 ];
 

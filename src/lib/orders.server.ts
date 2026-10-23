@@ -87,6 +87,13 @@ export async function recordCheckout(order: Omit<ShopOrder, "createdAt" | "statu
     ) on conflict (id) do nothing`;
 }
 
+export async function getShopOrder(id: string) {
+  const sql = await getSql();
+  const rows = await sql<Row>`select id, created_at, status, name, email, phone, street, zip, city, country, note, lines, goods, shipping, total
+    from shop_orders where id = ${id} limit 1`;
+  return rows[0] ? asOrder(rows[0]) : null;
+}
+
 export async function markOrderPaid(id: string) {
   const sql = await getSql();
   await sql`update shop_orders set status = 'bezahlt' where id = ${id}`;
