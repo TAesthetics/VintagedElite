@@ -177,7 +177,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </Link>
           </div>
           <p className="text-sm text-muted">
-            Second Hand nur, was im Atelier liegt. Fitness und Supplements im Sortiment. Zahlung auf Rechnung.
+            Second Hand nur, was im Atelier liegt. Fitness und Supplements im Sortiment. Karte, PayPal, Klarna oder Rechnung.
             hallo@vintagedelite.shop
           </p>
         </div>

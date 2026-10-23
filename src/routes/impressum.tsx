@@ -18,8 +18,8 @@ function ImpressumPage() {
       <p className="text-xs tracking-widest text-brass uppercase">Impressum</p>
       <h1 className="mt-2 font-display text-4xl">VintageElite</h1>
       <p className="mt-6 text-muted">
-        Marke und Shop für Powerlifting-Equipment. Kontakt: terence.nwaeke@gmail.com. Zahlung auf
-        Rechnung, zahlbar innerhalb von 14 Tagen. Der Versand startet nach Zahlungseingang.
+        Marke und Shop für Powerlifting-Equipment. Kontakt: terence.nwaeke@gmail.com. Zahlung per Karte,
+        PayPal oder Klarna über Stripe, oder auf Rechnung innerhalb von 14 Tagen.
       </p>
       <p className="mt-4 text-muted">
         Kein erfundener Registereintrag und keine Umsatzsteuer-ID. Bevor der Shop echt verkauft,

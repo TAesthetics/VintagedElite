@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { placeInvoiceOrder } from "@/lib/stripe-checkout.server";
+import { createCheckoutUrl, placeInvoiceOrder } from "@/lib/stripe-checkout.server";
 
 export const Route = createFileRoute("/api/checkout")({
   server: {
@@ -15,7 +15,11 @@ export const Route = createFileRoute("/api/checkout")({
         const requestHost = (forwarded || request.headers.get("host") || "")
           .replace(/:\d+$/, "")
           .toLowerCase();
-        const result = await placeInvoiceOrder(body, requestHost);
+        const pay = body && typeof body === "object" ? (body as { pay?: unknown }).pay : "";
+        const result =
+          pay === "card" || pay === "paypal" || pay === "klarna"
+            ? await createCheckoutUrl(body, requestHost)
+            : await placeInvoiceOrder(body, requestHost);
         const status = "url" in result ? 200 : result.status;
         return Response.json("url" in result ? { url: result.url } : { error: result.error }, {
           status,

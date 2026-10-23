@@ -13,7 +13,7 @@ export const Route = createFileRoute("/checkout")({
   head: () =>
     pageHead({
       title: "Kasse",
-      description: "Kasse bei VintageElite. Zahlung auf Rechnung.",
+      description: "Kasse bei VintageElite. Karte, PayPal, Klarna oder Rechnung.",
       path: "/checkout",
       index: false,
     }),
@@ -43,6 +43,7 @@ function CheckoutForm() {
   rememberProducts(uploaded);
   const lines = useCart((state) => state.lines);
   const [country, setCountry] = useState("DE");
+  const [pay, setPay] = useState("card");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -75,6 +76,7 @@ function CheckoutForm() {
           city: String(form.get("city") ?? ""),
           country,
           note: String(form.get("note") ?? ""),
+          pay,
           returnBase: browserBase(),
           lines: resolved.map((line) => ({
             slug: line.slug,
@@ -112,7 +114,7 @@ function CheckoutForm() {
       <div className="lg:col-span-7">
         <h1 className="font-display text-4xl">Kasse</h1>
         <p className="mt-3 text-muted">
-          Adresse hier. Zahlung auf Rechnung, keine Karte. Die Rechnung kommt an die E-Mail. Versand nach Zahlungseingang.
+          Adresse hier. Danach Karte, PayPal, Klarna oder Rechnung. Kartennummern bleiben bei Stripe.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <Field label="Name" name="name" autoComplete="name" className="sm:col-span-2" />
@@ -143,7 +145,32 @@ function CheckoutForm() {
         </div>
       </div>
       <aside className="h-fit border border-line bg-surface p-6 lg:col-span-5">
-        <h2 className="font-display text-2xl">Rechnung</h2>
+        <h2 className="font-display text-2xl">Zahlung</h2>
+        <fieldset className="mt-4 grid grid-cols-2 gap-2">
+          {(
+            [
+              ["card", "Karte"],
+              ["paypal", "PayPal"],
+              ["klarna", "Klarna"],
+              ["rechnung", "Rechnung"],
+            ] as const
+          ).map(([id, label]) => (
+            <label
+              key={id}
+              className={`flex min-h-11 cursor-pointer items-center justify-center border text-sm ${pay === id ? "border-oxblood bg-oxblood text-paper" : "border-line"}`}
+            >
+              <input
+                type="radio"
+                name="pay"
+                value={id}
+                checked={pay === id}
+                onChange={() => setPay(id)}
+                className="sr-only"
+              />
+              {label}
+            </label>
+          ))}
+        </fieldset>
         <ul className="mt-4 space-y-2 text-sm">
           {resolved.map((line) => (
             <li key={`${line.slug}-${line.variantId}`} className="flex justify-between gap-3">
@@ -176,7 +203,7 @@ function CheckoutForm() {
           disabled={busy}
           className="mt-6 inline-flex min-h-11 w-full items-center justify-center bg-oxblood text-sm text-paper disabled:opacity-60"
         >
-          {busy ? "Bestellung wird gespeichert…" : "Auf Rechnung bestellen"}
+          {busy ? "Weiter…" : pay === "rechnung" ? "Auf Rechnung bestellen" : pay === "paypal" ? "Mit PayPal zahlen" : pay === "klarna" ? "Mit Klarna zahlen" : "Mit Karte zahlen"}
         </button>
       </aside>
     </form>

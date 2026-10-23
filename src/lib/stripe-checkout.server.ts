@@ -24,6 +24,7 @@ export type CheckoutBody = {
   note: string;
   lines: CheckoutLine[];
   returnBase: string;
+  pay: "rechnung" | "card" | "paypal" | "klarna";
 };
 
 type Fail = { error: string; status: number };
@@ -49,11 +50,17 @@ export function readCheckoutBody(input: unknown, requestHost?: string): Checkout
   const note = text(body.note, 400);
   const phone = text(body.phone, 40);
   const returnBase = allowedReturnBase(body.returnBase, requestHost);
+  const payRaw = text(body.pay, 16);
+  const pay =
+    payRaw === "paypal" || payRaw === "klarna" || payRaw === "rechnung" || payRaw === "card"
+      ? payRaw
+      : "";
   if (name.length < 2) return fail("Name fehlt.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("E-Mail fehlt.");
   if (street.length < 3 || zip.length < 3 || city.length < 2) return fail("Adresse unvollständig.");
   if (!COUNTRIES.has(country)) return fail("Land wird nicht beliefert.");
   if (!returnBase) return fail("Rückkehr-Adresse ungültig.");
+  if (!pay) return fail("Zahlungsart fehlt.");
   if (!Array.isArray(body.lines) || body.lines.length === 0 || body.lines.length > 20) {
     return fail("Warenkorb ist leer.");
   }
@@ -69,7 +76,7 @@ export function readCheckoutBody(input: unknown, requestHost?: string): Checkout
     }
     lines.push({ slug, variantId, qty });
   }
-  return { name, email, phone, street, zip, city, country, note, lines, returnBase };
+  return { name, email, phone, street, zip, city, country, note, lines, returnBase, pay };
 }
 
 function isFail(value: unknown): value is Fail {
@@ -149,7 +156,7 @@ export async function createCheckoutUrl(input: unknown, requestHost?: string) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       locale: "de",
-      payment_method_types: ["card"],
+      allowed_payment_method_types: [body.pay === "paypal" || body.pay === "klarna" ? body.pay : "card"],
       customer_email: body.email,
       success_url: `${body.returnBase}/kasse/danke?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${body.returnBase}/checkout`,
@@ -228,6 +235,12 @@ export async function createCheckoutUrl(input: unknown, requestHost?: string) {
   } catch (error) {
     console.error(error);
     const detail = error instanceof Error ? error.message : "";
+    if (detail.includes("is invalid") || detail.includes("activated in your dashboard")) {
+      return fail(
+        "PayPal oder Klarna ist im Stripe-Konto noch nicht an. Im Dashboard unter Einstellungen, Zahlungsmethoden, die Methode einschalten.",
+        502,
+      );
+    }
     if (detail.includes("No valid payment method")) {
       return fail(
         "Stripe hat keine Kartenzahlung aktiv. Im Dashboard unter Einstellungen, Zahlungsmethoden, Karte einschalten.",

@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: "Zahlung",
-    a: "Auf Rechnung, zahlbar innerhalb von 14 Tagen. Der Versand startet nach Zahlungseingang. Keine Kartenzahlung.",
+    a: "Karte, PayPal oder Klarna über Stripe, oder auf Rechnung innerhalb von 14 Tagen. Bei Rechnung startet der Versand nach Zahlungseingang.",
   },
 ];
 
